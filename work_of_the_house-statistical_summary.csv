@@ -1,0 +1,145 @@
+Topic,Topic Notes,Metric,Metric Notes,Sitting year,Sitting period,Value
+House,,Sitting weeks,,2015,Autumn,5
+House,,Sitting days,,2015,Autumn,20
+House,,Sitting weeks,,2015,Winter,5
+House,,Sitting days,,2015,Winter,19
+House,,Sitting weeks,,2015,Spring,9
+House,,Sitting days,,2015,Spring,36
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions of sittings,For example: suspensions overnight during extended sittings.,2015,Autumn,191
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions of sittings,,2015,Autumn,191
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions of sittings,For example: suspensions overnight during extended sittings.,2015,Winter,190
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions of sittings,,2015,Winter,187
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions of sittings,For example: suspensions overnight during extended sittings.,2015,Spring,365
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions of sittings,,2015,Spring,358
+Federation Chamber,,Meetings,,2015,Autumn,15
+Federation Chamber,,Meetings,,2015,Winter,17
+Federation Chamber,,Meetings,,2015,Spring,25
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions,For example: suspensions for divisions and other proceedings in House.,2015,Autumn,59
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions,,2015,Autumn,45
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions,For example: suspensions for divisions and other proceedings in House.,2015,Winter,101
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions,,2015,Winter,77
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions,For example: suspensions for divisions and other proceedings in House.,2015,Spring,104
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions,,2015,Spring,80
+Private Members’ business,Includes Federation Chamber.,Private Members’ motions moved and debated,Includes a motion moved in 2014 for which debate resumed on 9 Feb.,2015,Autumn,34
+Private Members’ business,Includes Federation Chamber.,90 second statements by private Members,,2015,Autumn,482
+Private Members’ business,Includes Federation Chamber.,3 minute constituency statements in Federation Chamber,,2015,Autumn,223
+Private Members’ business,Includes Federation Chamber.,Private Members’ motions moved and debated,Includes a motion moved in 2014 for which debate resumed on 9 Feb.,2015,Winter,26
+Private Members’ business,Includes Federation Chamber.,90 second statements by private Members,,2015,Winter,478
+Private Members’ business,Includes Federation Chamber.,3 minute constituency statements in Federation Chamber,,2015,Winter,201
+Private Members’ business,Includes Federation Chamber.,Private Members’ motions moved and debated,Includes a motion moved in 2014 for which debate resumed on 9 Feb.,2015,Spring,70
+Private Members’ business,Includes Federation Chamber.,90 second statements by private Members,,2015,Spring,918
+Private Members’ business,Includes Federation Chamber.,3 minute constituency statements in Federation Chamber,,2015,Spring,440
+Other opportunities for private Members (days occurring),,Adjournment motion debated in House,,2015,Autumn,19
+Other opportunities for private Members (days occurring),,Adjournment motion debated in Federation Chamber,,2015,Autumn,5
+Other opportunities for private Members (days occurring),,Grievance debate called on and debated,,2015,Autumn,5
+Other opportunities for private Members (days occurring),,Matters of public importance discussed,,2015,Autumn,15
+Other opportunities for private Members (days occurring),,Adjournment motion debated in House,,2015,Winter,17
+Other opportunities for private Members (days occurring),,Adjournment motion debated in Federation Chamber,,2015,Winter,4
+Other opportunities for private Members (days occurring),,Grievance debate called on and debated,,2015,Winter,4
+Other opportunities for private Members (days occurring),,Matters of public importance discussed,,2015,Winter,15
+Other opportunities for private Members (days occurring),,Adjournment motion debated in House,,2015,Spring,33
+Other opportunities for private Members (days occurring),,Adjournment motion debated in Federation Chamber,,2015,Spring,9
+Other opportunities for private Members (days occurring),,Grievance debate called on and debated,,2015,Spring,8
+Other opportunities for private Members (days occurring),,Matters of public importance discussed,,2015,Spring,27
+Closures and divisions,,Closure of Member agreed to,,2015,Autumn,6
+Closures and divisions,,Closure of question agreed to,,2015,Autumn,4
+Closures and divisions,,Divisions,,2015,Autumn,26
+Closures and divisions,,Closure of Member agreed to,,2015,Winter,7
+Closures and divisions,,Closure of question agreed to,,2015,Winter,8
+Closures and divisions,,Divisions,,2015,Winter,38
+Closures and divisions,,Closure of Member agreed to,,2015,Spring,16
+Closures and divisions,,Closure of question agreed to,,2015,Spring,10
+Closures and divisions,,Divisions,,2015,Spring,55
+Parliamentary committees,,Reports presented,,2015,Autumn,33
+Parliamentary committees,,Reports presented,,2015,Winter,42
+Parliamentary committees,,Reports presented,,2015,Spring,54
+Petitions,,Petitions presented,,2015,Autumn,31
+Petitions,,Signatures to petitions,,2015,Autumn,"105,618"
+Petitions,,Ministerial responses presented,,2015,Autumn,23
+Petitions,,Petitions presented,,2015,Winter,16
+Petitions,,Signatures to petitions,,2015,Winter,"36,184"
+Petitions,,Ministerial responses presented,,2015,Winter,18
+Petitions,,Petitions presented,,2015,Spring,57
+Petitions,,Signatures to petitions,,2015,Spring,"63,585"
+Petitions,,Ministerial responses presented,,2015,Spring,38
+Questions,,Questions in writing (placed on Notice Paper),,2015,Autumn,74
+Questions,,Oral questions (without notice),,2015,Autumn,335
+Questions,,Average number of oral questions asked for each sitting day on which question time occurred,,2015,Autumn,17.6
+Questions,,Questions in writing (placed on Notice Paper),,2015,Winter,77
+Questions,,Oral questions (without notice),,2015,Winter,351
+Questions,,Average number of oral questions asked for each sitting day on which question time occurred,,2015,Winter,18.5
+Questions,,Questions in writing (placed on Notice Paper),,2015,Spring,"1,294"
+Questions,,Oral questions (without notice),,2015,Spring,685
+Questions,,Average number of oral questions asked for each sitting day on which question time occurred,,2015,Spring,19.6
+House,,Sitting weeks,,2014,Autumn,5
+House,,Sitting days,,2014,Autumn,19
+House,,Sitting weeks,,2014,Winter,7
+House,,Sitting days,,2014,Winter,24
+House,,Sitting weeks,,2014,Spring,9
+House,,Sitting days,,2014,Spring,33
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions of sittings,For example: suspensions overnight during extended sittings.,2014,Autumn,188
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions of sittings,,2014,Autumn,186
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions of sittings,For example: suspensions overnight during extended sittings.,2014,Winter,255
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions of sittings,,2014,Winter,235
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions of sittings,For example: suspensions overnight during extended sittings.,2014,Spring,316
+Hours of sittings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions of sittings,,2014,Spring,301
+Federation Chamber,,Meetings,,2014,Autumn,14
+Federation Chamber,,Meetings,,2014,Winter,20
+Federation Chamber,,Meetings,,2014,Spring,22
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions,For example: suspensions for divisions and other proceedings in House.,2014,Autumn,57
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions,,2014,Autumn,42
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions,For example: suspensions for divisions and other proceedings in House.,2014,Winter,121
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions,,2014,Winter,91
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding. For example: suspensions overnight during extended sittings.,Including suspensions,For example: suspensions for divisions and other proceedings in House.,2014,Spring,96
+Hours of meetings,Adjusted to the nearest hour. Discrepancies in totals due to rounding.,Excluding suspensions,,2014,Spring,76
+Private Members’ business,Includes Federation Chamber.,Private Members’ motions moved and debated,Includes a motion moved in 2014 for which debate resumed on 9 Feb.,2014,Autumn,30
+Private Members’ business,Includes Federation Chamber.,90 second statements by private Members,,2014,Autumn,464
+Private Members’ business,Includes Federation Chamber.,3 minute constituency statements in Federation Chamber,,2014,Autumn,170
+Private Members’ business,Includes Federation Chamber.,Private Members’ motions moved and debated,Includes a motion moved in 2014 for which debate resumed on 9 Feb.,2014,Winter,37
+Private Members’ business,Includes Federation Chamber.,90 second statements by private Members,,2014,Winter,590
+Private Members’ business,Includes Federation Chamber.,3 minute constituency statements in Federation Chamber,,2014,Winter,222
+Private Members’ business,Includes Federation Chamber.,Private Members’ motions moved and debated,Includes a motion moved in 2014 for which debate resumed on 9 Feb.,2014,Spring,41
+Private Members’ business,Includes Federation Chamber.,90 second statements by private Members,,2014,Spring,734
+Private Members’ business,Includes Federation Chamber.,3 minute constituency statements in Federation Chamber,,2014,Spring,250
+Other opportunities for private Members (days occurring),,Adjournment motion debated in House,,2014,Autumn,19
+Other opportunities for private Members (days occurring),,Adjournment motion debated in Federation Chamber,,2014,Autumn,5
+Other opportunities for private Members (days occurring),,Grievance debate called on and debated,,2014,Autumn,4
+Other opportunities for private Members (days occurring),,Matters of public importance discussed,,2014,Autumn,14
+Other opportunities for private Members (days occurring),,Adjournment motion debated in House,,2014,Winter,18
+Other opportunities for private Members (days occurring),,Adjournment motion debated in Federation Chamber,,2014,Winter,6
+Other opportunities for private Members (days occurring),,Grievance debate called on and debated,,2014,Winter,5
+Other opportunities for private Members (days occurring),,Matters of public importance discussed,,2014,Winter,17
+Other opportunities for private Members (days occurring),,Adjournment motion debated in House,,2014,Spring,28
+Other opportunities for private Members (days occurring),,Adjournment motion debated in Federation Chamber,,2014,Spring,8
+Other opportunities for private Members (days occurring),,Grievance debate called on and debated,,2014,Spring,6
+Other opportunities for private Members (days occurring),,Matters of public importance discussed,,2014,Spring,23
+Closures and divisions,,Closure of Member agreed to,,2014,Autumn,8
+Closures and divisions,,Closure of question agreed to,,2014,Autumn,6
+Closures and divisions,,Divisions,,2014,Autumn,37
+Closures and divisions,,Closure of Member agreed to,,2014,Winter,4
+Closures and divisions,,Closure of question agreed to,,2014,Winter,17
+Closures and divisions,,Divisions,,2014,Winter,75
+Closures and divisions,,Closure of Member agreed to,,2014,Spring,10
+Closures and divisions,,Closure of question agreed to,,2014,Spring,19
+Closures and divisions,,Divisions,,2014,Spring,66
+Parliamentary committees,,Reports presented,,2014,Autumn,19
+Parliamentary committees,,Reports presented,,2014,Winter,26
+Parliamentary committees,,Reports presented,,2014,Spring,54
+Petitions,,Petitions presented,,2014,Autumn,25
+Petitions,,Signatures to petitions,,2014,Autumn,"1,251,499"
+Petitions,,Ministerial responses presented,,2014,Autumn,10
+Petitions,,Petitions presented,,2014,Winter,29
+Petitions,,Signatures to petitions,,2014,Winter,"82,007"
+Petitions,,Ministerial responses presented,,2014,Winter,28
+Petitions,,Petitions presented,,2014,Spring,50
+Petitions,,Signatures to petitions,,2014,Spring,"106,764"
+Petitions,,Ministerial responses presented,,2014,Spring,29
+Questions,,Questions in writing (placed on Notice Paper),,2014,Autumn,59
+Questions,,Oral questions (without notice),,2014,Autumn,392
+Questions,,Average number of oral questions asked for each sitting day on which question time occurred,,2014,Autumn,20.6
+Questions,,Questions in writing (placed on Notice Paper),,2014,Winter,156
+Questions,,Oral questions (without notice),,2014,Winter,474
+Questions,,Average number of oral questions asked for each sitting day on which question time occurred,,2014,Winter,20.6
+Questions,,Questions in writing (placed on Notice Paper),,2014,Spring,429
+Questions,,Oral questions (without notice),,2014,Spring,567
+Questions,,Average number of oral questions asked for each sitting day on which question time occurred,,2014,Spring,19.5
