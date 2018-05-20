@@ -11,21 +11,46 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import json
+
+from django.core.exceptions import ImproperlyConfigured
+from django.urls import reverse_lazy
+from django.db import models
+
+def here(*paths):
+    """
+    Return a path relative to the directory containing the settings module.
+
+    ie. a path starting in the directory which contains the settings directory.
+    """
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                        *paths)
+
+def load_secrets(secrets_file='secrets.json'):
+    """
+    Returns the parsed json from the secrets file.
+
+    The secrets file is expected to be in the settings directory. Make all
+    filenames passed into this function relative to the `settings` directory.
+    """
+    secrets_path = here('settings', secrets_file)
+    if not os.path.exists(secrets_path):
+        raise ImproperlyConfigured(
+            "Secrets file ({}) was not found.".format(secrets_path)
+        )
+    with open(secrets_path) as fid:
+        return json.loads(fid.read())
+
+def get_secret(setting, secrets):
+    try:
+        return secrets[setting]
+    except KeyError:
+        raise ImproperlyConfigured(
+            "The secret `{}` must be set.".format(setting)
+        )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0fu0)s8_6nuu^-st31ur39-wo)kq4e)*&!r(_(^psn)i-$du_w'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -37,6 +62,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'hansard',
 ]
 
 MIDDLEWARE = [
@@ -68,18 +95,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'rtp.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
