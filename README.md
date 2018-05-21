@@ -25,3 +25,11 @@ ogr2ogr -f "ESRI Shapefile" -t_srs EPSG:4326 aec/data/national2016.shp ~/Data/ae
 Warning 6: Normalized/laundered field name: 'Total_Population' to 'Total_Popu'
 Warning 6: Normalized/laundered field name: 'Australians_Over_18' to 'Australian'
 ```
+
+
+Download all NLTK packages:
+
+```
+>>> import nltk
+>>> nltk.download()
+```
