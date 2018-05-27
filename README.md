@@ -33,3 +33,9 @@ Download all NLTK packages:
 >>> import nltk
 >>> nltk.download()
 ```
+
+Download spaCy model:
+
+```
+python -m spacy download en_core_web_sm
+```
