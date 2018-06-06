@@ -15,6 +15,111 @@ from nltk.chunk import tree2conlltags
 
 logger = logging.getLogger(__name__)
 
+def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
+    # Returns a structured log of actual speeches devoid of procedural ornements 
+    # Actual speeches are flagged by:
+    # 
+
+    # HPS-MemberSpeech
+    # Note: usually decorated with some regularly expressed markup
+    """
+                    <a href="00APG" type="MemberSpeech">
+                        <span class="HPS-MemberSpeech">The SPEAKER</span>
+                    </a> (<span class="HPS-Time">09:31</span>):
+    """
+    # or
+    """
+                    <a href="HWP" type="MemberSpeech">
+                        <span class="HPS-MemberSpeech">Ms MARINO</span>
+                    </a> (<span class="HPS-Electorate">Forrest</span>—<span class="HPS-MinisterialTitles">Chief Government Whip</span>) (<span class="HPS-Time">09:31</span>):
+    """
+
+    # HPS-MemberQuestion
+    """
+                    <a href="M3C" type="MemberQuestion">
+                        <span class="HPS-MemberQuestion">Mr BANDT</span>
+                    </a> (<span class="HPS-Electorate">Melbourne</span>) (<span class="HPS-Time">14:19</span>):
+    """
+    # or
+    """
+                    <a href="00ATG" type="MemberQuestion">
+                        <span class="HPS-MemberQuestion">Mr SHORTEN</span>
+                    </a> (<span class="HPS-Electorate">Maribyrnong</span>—<span class="HPS-MinisterialTitles">Leader of the Opposition</span>) (<span class="HPS-Time">14:25</span>):
+    """
+    # HPS-MemberAnswer
+    """
+                    <a href="208884" type="MemberAnswer">
+                        <span class="HPS-MemberAnswer">Mr PORTER</span>
+                    </a> (<span class="HPS-Electorate">Pearce</span>—<span class="HPS-MinisterialTitles">Attorney-General</span>) (<span class="HPS-Time">14:27</span>):
+    """
+    # HPS-MemberContinuation
+    """
+                    <a href="E3L" type="MemberContinuation">
+                        <span class="HPS-MemberContinuation">Mr MORRISON:</span>
+                    </a>
+    """
+    # HPS-MemberInterjecting
+    # Note: HPS-MemberIInterjecting is excluded as it contains no spoken words
+    # Note: HPS-OfficeInterjecting is excluded as it contains only procedural gibberish
+    # Note: HPS-GeneralInterjecting is excluded as it not attributable to anyone
+    # Target structure to be a list of dict
+    # each dict contains:
+    # speaker
+    # type of contribution (speech, question, answer, continuation, interjection)
+    # time (for speech, question and answer)
+    # a list of paragraphs, in the same order they were delivered
+    # Supported parsers
+    # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-a-parser
+    with open(os.path.join('hansard/data/raw', filename), 'r') as xml: 
+        soup = BeautifulSoup(xml.read(), "xml")
+
+    # Cleaning up
+    sample = ''
+    current_speaker = None
+    fragments, fragment = [], {}
+
+    for talk in soup.find_all('talk.text')[:3]:
+        for p in talk.find_all('p'):
+            try:
+                spans = p.find_all('span')
+                for span in spans:
+                    if span.has_attr('class'):
+                        if span['class'] in ["HPS-MemberSpeech", "HPS-MemberQuestion", "HPS-MemberAnswer"]:
+                            # Changing speaker: need a new fragment
+                            print("Fragment: %s" % (fragment))
+                            if fragment.keys():
+                                fragments.append(fragment)
+                            fragment = {
+                                'speaker': span.get_text(),
+                                'type': span['class'],
+                                'time': None,
+                                'text': []
+                            }
+                        elif span['class'] in ["HPS-Time"]:
+                            fragment['time'] = span.get_text()
+                        elif span['class'] in ["HPS-Normal"]:
+                            if 'text' in fragment.keys():
+                                fragment['text'] += [span.get_text()]
+                            else:
+                                fragment['text'] = [span.get_text()]
+                        else:
+                            # Unrecognised class
+                            pass
+                    else:
+                        # Non-tagged spans not interesting
+                        pass
+
+            except AttributeError as e:
+                # Not a tag element, probably a string like '\n'
+                print(str(e))
+
+
+
+    # Add a space after each dot
+    #raw_text = talk.get_text(strip=True).replace('.', '. ')
+    #sample += raw_text
+
+
 
 def process_hansard_file(filename='House of Representatives_2018_05_10_6091.xml'):
     # Supported parsers
