@@ -13,6 +13,8 @@ from nltk.tag.stanford import StanfordNERTagger
 from nltk.tokenize.punkt import PunktSentenceTokenizer
 from nltk.chunk import tree2conlltags
 
+from .models import *
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,15 +22,22 @@ logger = logging.getLogger(__name__)
 # by extracting speaker, type, time and cleaned text
 def contextualise_tag(tag):
     try:
-        speech = {}
+        speech, person = {}, {}
         speech_header = tag.parent.p.span
-        # returns the full context for a sentence
-        # Type classes
-        # TODO: HPS-MemberContinuation?
-        type_classes = ['HPS-MemberSpeech', 'HPS-MemberQuestion', 'HPS-MemberAnswer', 'HPS-OfficeSpeech']
-        speech['type'] = speech_header.find(attrs={'class':type_classes})['class']
-        speech['person'] = speech_header.find(attrs={'class':type_classes}).get_text()
-        speech['time'] = speech_header.find(attrs={'class':'HPS-Time'}).get_text()
+        speech['time_talk_started'] = speech_header.find(attrs={'class':'HPS-Time'}).get_text()
+
+        speech_meta = tag.parent.parent.parent.find('talk.start')
+        speech['talk_type'] = speech_meta.parent.name
+        speech['first_speech'] = speech_meta.talker.find('first.speech').get_text()
+
+        name_id = speech_meta.talker.find('name.id').get_text()
+        person['name'] = speech_meta.talker.find('name').get_text()
+        person['electorate'] = FederalElectorate2016.objects.get(elect_div=speech_meta.talker.find('electorate').get_text())
+        person['party'] = speech_meta.talker.find('party').get_text()
+        # TODO: add in_gov if its value has meaning
+        # person['in_gov'] = speech_meta.talker.find('in.gov').get_text()
+
+        pobj, created = Person.objects.update_or_create(name_id=name_id, defaults=person)
 
         # First element: a bit of wrangling to get the useful text
         if tag==tag.parent.p:
@@ -38,10 +47,13 @@ def contextualise_tag(tag):
             # Other elements are more straight forward
             speech['text'] = tag.get_text().strip('\n')
 
+        # TODO: create referenced sentences records
+
         return speech
 
     except Exception as e:
         logger.debug("Error contextualising tag: %s" % (tag,))
+        raise
 
 
 # Returns a structured log of actual speeches devoid of procedural ornements, and annotated by their speaker, start time and type
@@ -50,6 +62,8 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
     # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-a-parser
     with open(os.path.join('hansard/data/raw', filename), 'r') as xml: 
         soup = BeautifulSoup(xml.read(), "xml")
+
+    # TODO: create/update session and debate references records
 
     # Fragment contextualisation & cleaning
     fragments = []
@@ -62,7 +76,7 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
             else:
                 fragments.append(contextualise_tag(p))
 
-    sample = " ".join([frag['text'] for frag in fragments])
+    sample = " ".join([frag['text'] for frag in fragments if frag])
     return soup, sample
 
 

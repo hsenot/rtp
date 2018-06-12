@@ -1,8 +1,8 @@
 from django.contrib.gis.db import models
 
 
-class federal_electorate_2016(models.Model):
-    elect_div = models.CharField(max_length=30)
+class FederalElectorate2016(models.Model):
+    elect_div = models.CharField(max_length=30, unique=True)
     state = models.CharField(max_length=4)
     numccds = models.IntegerField()
     actual = models.IntegerField()

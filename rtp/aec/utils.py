@@ -10,10 +10,10 @@ def load_data_assets(load_boundaries=True):
     boundaries_file = os.path.join(aec_folder, 'national2016.shp')
 
     if load_boundaries:
-        federal_electorate_2016.objects.all().delete()
+        FederalElectorate2016.objects.all().delete()
         # Layer mapping
         lm = LayerMapping(
-            federal_electorate_2016,
+            FederalElectorate2016,
             boundaries_file,
             federal_electorate_2016_mapping,
             transform=False,
@@ -25,5 +25,5 @@ def load_data_assets(load_boundaries=True):
 
         # Fixing 2 spelling mistakes in the GIS dataset
         # Detected by comapring with eletcorates in TheyVoteForYou
-        federal_electorate_2016.objects.filter(elect_div='Mcmillan').update(elect_div='McMillan')
-        federal_electorate_2016.objects.filter(elect_div='Mcpherson').update(elect_div='McPherson')
+        FederalElectorate2016.objects.filter(elect_div='Mcmillan').update(elect_div='McMillan')
+        FederalElectorate2016.objects.filter(elect_div='Mcpherson').update(elect_div='McPherson')
