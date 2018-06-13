@@ -24,6 +24,7 @@ def contextualise_tag(tag):
     try:
         speech, person = {}, {}
         speech_header = tag.parent.p.span
+        # Rare: missing time marker
         time_started_tag = speech_header.find(attrs={'class':'HPS-Time'})
         if time_started_tag:
             speech['time_talk_started'] = time_started_tag.get_text()
@@ -35,6 +36,7 @@ def contextualise_tag(tag):
         name_id = speech_meta.talker.find('name.id').get_text()
         person['name'] = speech_meta.talker.find('name').get_text()
         electorate = speech_meta.talker.find('electorate').get_text()
+        # Senate members don't have a federal electorate
         if len(electorate) > 0:
             person['electorate'] = FederalElectorate2016.objects.get(elect_div=electorate)
         person['party'] = speech_meta.talker.find('party').get_text()
@@ -45,6 +47,7 @@ def contextualise_tag(tag):
 
         # First element: a bit of wrangling to get the useful text
         if tag==tag.parent.p:
+            # Rare: missing time marker
             siblings = [si if isinstance(si, element.NavigableString) else si.get_text() for si in (tag.find(attrs={'class':'HPS-Time'}) or tag.span).next_siblings]
             speech['text'] = "".join(siblings)[4:]
         else:
