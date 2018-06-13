@@ -24,7 +24,9 @@ def contextualise_tag(tag):
     try:
         speech, person = {}, {}
         speech_header = tag.parent.p.span
-        speech['time_talk_started'] = speech_header.find(attrs={'class':'HPS-Time'}).get_text()
+        time_started_tag = speech_header.find(attrs={'class':'HPS-Time'})
+        if time_started_tag:
+            speech['time_talk_started'] = time_started_tag.get_text()
 
         speech_meta = tag.parent.parent.parent.find('talk.start')
         speech['talk_type'] = speech_meta.parent.name
@@ -32,7 +34,9 @@ def contextualise_tag(tag):
 
         name_id = speech_meta.talker.find('name.id').get_text()
         person['name'] = speech_meta.talker.find('name').get_text()
-        person['electorate'] = FederalElectorate2016.objects.get(elect_div=speech_meta.talker.find('electorate').get_text())
+        electorate = speech_meta.talker.find('electorate').get_text()
+        if len(electorate) > 0:
+            person['electorate'] = FederalElectorate2016.objects.get(elect_div=electorate)
         person['party'] = speech_meta.talker.find('party').get_text()
         # TODO: add in_gov if its value has meaning
         # person['in_gov'] = speech_meta.talker.find('in.gov').get_text()
@@ -41,7 +45,7 @@ def contextualise_tag(tag):
 
         # First element: a bit of wrangling to get the useful text
         if tag==tag.parent.p:
-            siblings = [si if isinstance(si, element.NavigableString) else si.get_text() for si in tag.find(attrs={'class':'HPS-Time'}).next_siblings]
+            siblings = [si if isinstance(si, element.NavigableString) else si.get_text() for si in (tag.find(attrs={'class':'HPS-Time'}) or tag.span).next_siblings]
             speech['text'] = "".join(siblings)[4:]
         else:
             # Other elements are more straight forward

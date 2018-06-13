@@ -33,7 +33,7 @@ class Person(models.Model):
 class Sentence(models.Model):
     debate_ref = models.ForeignKey(DebateReference, on_delete=models.CASCADE)
     spoken_by = models.ForeignKey(Person, on_delete=models.CASCADE)
-    time_talk_started = models.TimeField()
+    time_talk_started = models.TimeField(null=True)
     talk_type = models.CharField(max_length=32)
     first_speech = models.BooleanField(default=False)
     # The actual sentence
