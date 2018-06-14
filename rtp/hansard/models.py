@@ -23,9 +23,9 @@ class DebateReference(models.Model):
     session = models.ForeignKey(SessionReference, on_delete=models.CASCADE)
     debate_title = models.CharField(max_length=255)
     debate_page_no = models.IntegerField()
-    subdebate1_title = models.CharField(max_length=255, null=True)
+    subdebate1_title = models.CharField(max_length=1024, null=True)
     subdebate1_page_no = models.IntegerField(null=True)
-    subdebate2_title = models.CharField(max_length=255, null=True)
+    subdebate2_title = models.CharField(max_length=1024, null=True)
     subdebate2_page_no = models.IntegerField(null=True)
 
     class Meta:

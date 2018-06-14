@@ -93,34 +93,47 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
         if len(talk.get_text()) > 1:
             sd2 = talk.parent.parent
 
+            base_params = {
+                'session': None,
+                'debate_title': None,
+                'debate_page_no': None,
+                'subdebate1_title': None,
+                'subdebate1_page_no': None,
+                'subdebate2_title': None,
+                'subdebate2_page_no': None,                
+            }
+
             try:
                 while 1:
                     if sd2.name=='debate':
-                        params = {
+                        params = base_params
+                        params.update({
                             'debate_title': sd2.debateinfo.title.get_text(),
                             'debate_page_no': int(sd2.debateinfo.find('page.no').get_text()),
                             'session': sobj,
-                        }
+                        })
                         logger.debug("debate tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
                         dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
                         break
                     elif sd2.name=='subdebate.1' and sd2.parent.name=='debate':
-                        params = {                    
-                            'subdebate1_title': sd2.parent.subdebateinfo.title.get_text(),
-                            'subdebate1_page_no': int(sd2.parent.subdebateinfo.find('page.no').get_text()) if len(sd2.parent.subdebateinfo.find('page.no').get_text()) else None,
-                            'debate_title': sd2.parent.parent.debateinfo.title.get_text(),
-                            'debate_page_no': int(sd2.parent.parent.debateinfo.find('page.no').get_text()),
+                        params = base_params
+                        params.update({                    
+                            'subdebate1_title': sd2.subdebateinfo.title.get_text(),
+                            'subdebate1_page_no': int(sd2.subdebateinfo.find('page.no').get_text()) if len(sd2.subdebateinfo.find('page.no').get_text()) else None,
+                            'debate_title': sd2.parent.debateinfo.title.get_text(),
+                            'debate_page_no': int(sd2.parent.debateinfo.find('page.no').get_text()),
                             'session': sobj,
-                        }
+                        })
                         logger.debug("debate > subdebate.1 tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
                         dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
                         break
                     elif sd2.name=='subdebate.2':
-                        params = {
+                        params = base_params
+                        params.update({
                             'subdebate2_title': sd2.subdebateinfo.title.get_text(),
                             'subdebate2_page_no': int(sd2.subdebateinfo.find('page.no').get_text()) if len(sd2.subdebateinfo.find('page.no').get_text()) else None,
                             'session': sobj,
-                        }
+                        })
                         if sd2.parent.name=='debate':
                             params.update({
                                 'debate_title': sd2.parent.debateinfo.title.get_text(),
