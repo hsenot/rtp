@@ -2,6 +2,7 @@ import os
 import nltk 
 import logging
 import spacy
+import datetime
 
 from lxml import etree
 from bs4 import BeautifulSoup, element
@@ -13,6 +14,8 @@ from nltk.tag.stanford import StanfordNERTagger
 from nltk.tokenize.punkt import PunktSentenceTokenizer
 from nltk.chunk import tree2conlltags
 
+from django.db.utils import DataError
+
 from .models import *
 
 logger = logging.getLogger(__name__)
@@ -20,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 # Contextualise a tag within a hansard file 
 # by extracting speaker, type, time and cleaned text
-def contextualise_tag(tag):
+def contextualise_tag(tag, debate_id):
     try:
         speech, person = {}, {}
         speech_header = tag.parent.p.span
@@ -59,29 +62,97 @@ def contextualise_tag(tag):
         return speech
 
     except Exception as e:
-        logger.debug("Error contextualising tag: %s" % (tag,))
+        logger.debug("Error contextualising tag: %s" % (str(tag)[:100],))
         raise
 
 
 # Returns a structured log of actual speeches devoid of procedural ornements, and annotated by their speaker, start time and type
 def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
+    # House of Representatives_2018_05_21_6162.xml
     # Supported parsers
     # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-a-parser
     with open(os.path.join('hansard/data/raw', filename), 'r') as xml: 
         soup = BeautifulSoup(xml.read(), "xml")
 
-    # TODO: create/update session and debate references records
+    session = soup.hansard.find('session.header')
+    session_params = {
+        'parliament_no': int(session.find('parliament.no').get_text()),
+        'date': datetime.datetime.strptime(session.date.get_text(), '%Y-%m-%d'),
+        'session_no': int(session.find('session.no').get_text()),
+        'period_no': int(session.find('period.no').get_text()),
+        'chamber': session.chamber.get_text(),
+    }
+    sobj, created = SessionReference.objects.update_or_create(**session_params, defaults=session_params)
 
-    # Fragment contextualisation & cleaning
+     # Fragment contextualisation & cleaning
     fragments = []
     interjection_classes = ['HPS-MemberInterjecting', 'HPS-MemberIInterjecting', 'HPS-OfficeInterjecting']
 
     for talk in soup.find_all('talk.text'):
-        for p in talk.find_all('p'):
-            if p.find(attrs={'class': interjection_classes}):
-                pass
-            else:
-                fragments.append(contextualise_tag(p))
+        # skip <talk.text>\n</talk.text>
+        if len(talk.get_text()) > 1:
+            sd2 = talk.parent.parent
+
+            try:
+                while 1:
+                    if sd2.name=='debate':
+                        params = {
+                            'debate_title': sd2.debateinfo.title.get_text(),
+                            'debate_page_no': int(sd2.debateinfo.find('page.no').get_text()),
+                            'session': sobj,
+                        }
+                        logger.debug("debate tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
+                        dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
+                        break
+                    elif sd2.name=='subdebate.1' and sd2.parent.name=='debate':
+                        params = {                    
+                            'subdebate1_title': sd2.parent.subdebateinfo.title.get_text(),
+                            'subdebate1_page_no': int(sd2.parent.subdebateinfo.find('page.no').get_text()) if len(sd2.parent.subdebateinfo.find('page.no').get_text()) else None,
+                            'debate_title': sd2.parent.parent.debateinfo.title.get_text(),
+                            'debate_page_no': int(sd2.parent.parent.debateinfo.find('page.no').get_text()),
+                            'session': sobj,
+                        }
+                        logger.debug("debate > subdebate.1 tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
+                        dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
+                        break
+                    elif sd2.name=='subdebate.2':
+                        params = {
+                            'subdebate2_title': sd2.subdebateinfo.title.get_text(),
+                            'subdebate2_page_no': int(sd2.subdebateinfo.find('page.no').get_text()) if len(sd2.subdebateinfo.find('page.no').get_text()) else None,
+                            'session': sobj,
+                        }
+                        if sd2.parent.name=='debate':
+                            params.update({
+                                'debate_title': sd2.parent.debateinfo.title.get_text(),
+                                'debate_page_no': int(sd2.parent.debateinfo.find('page.no').get_text()) if len(sd2.parent.debateinfo.find('page.no').get_text()) else None,
+                            })
+                        elif sd2.parent.name=='subdebate.1' and sd2.parent.parent.name=='debate':
+                            params.update({
+                                'subdebate1_title': sd2.parent.subdebateinfo.title.get_text(),
+                                'subdebate1_page_no': int(sd2.parent.subdebateinfo.find('page.no').get_text()) if len(sd2.parent.subdebateinfo.find('page.no').get_text()) else None,
+                                'debate_title': sd2.parent.parent.debateinfo.title.get_text(),
+                                'debate_page_no': int(sd2.parent.parent.debateinfo.find('page.no').get_text()),
+                            })
+                        else:
+                            logger.debug("subdebate.2 tag has no debate or subdebate.1 direct ancestor: %s" % talk.parent.parent.name)
+
+                        logger.debug("%s > %s > %s tag enclosing %s > talk.text: %s" % (sd2.parent.parent.name, sd2.parent.name, sd2.name, talk.parent.name, params))
+                        dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
+                        break
+                    sd2 = sd2.parent
+
+            except AttributeError as e:
+                logger.debug("Couldn't extract debate reference: %s" % str(sd2)[:100])
+                raise
+            except DataError as e:
+                logger.debug("Couldn't persist debate reference: %s" % params)
+                raise
+
+            for p in talk.find_all('p'):
+                if p.find(attrs={'class': interjection_classes}):
+                    pass
+                else:
+                    fragments.append(contextualise_tag(p, dobj.id))
 
     sample = " ".join([frag['text'] for frag in fragments if frag])
     return soup, sample

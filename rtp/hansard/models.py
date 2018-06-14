@@ -14,14 +14,24 @@ class SessionReference(models.Model):
     )
     chamber = models.CharField(max_length=16, choices=CHAMBERS)
 
+    class Meta:
+        unique_together = (
+            ('parliament_no', 'date', 'session_no', 'period_no', 'chamber')
+        )
+
 class DebateReference(models.Model):
     session = models.ForeignKey(SessionReference, on_delete=models.CASCADE)
-    debate_title = models.CharField(max_length=128)
+    debate_title = models.CharField(max_length=255)
     debate_page_no = models.IntegerField()
-    subdebate1_title = models.CharField(max_length=128)
-    subdebate1_page_no = models.IntegerField()
-    subdebate2_title = models.CharField(max_length=128)
-    subdebate2_page_no = models.IntegerField()
+    subdebate1_title = models.CharField(max_length=255, null=True)
+    subdebate1_page_no = models.IntegerField(null=True)
+    subdebate2_title = models.CharField(max_length=255, null=True)
+    subdebate2_page_no = models.IntegerField(null=True)
+
+    class Meta:
+        unique_together = (
+            ('session', 'debate_title', 'debate_page_no', 'subdebate1_title', 'subdebate1_page_no', 'subdebate2_title', 'subdebate2_page_no')
+        )
 
 class Person(models.Model):
     name_id = models.CharField(max_length=16, unique=True)
