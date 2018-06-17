@@ -25,16 +25,20 @@ logger = logging.getLogger(__name__)
 # by extracting speaker, type, time and cleaned text
 def contextualise_tag(tag, debate_id):
     try:
-        speech, person = {}, {}
-        speech_header = tag.parent.p.span
+        speech, person = {'debate_ref_id': debate_id}, {}
+
         # Rare: missing time marker
+        speech_header = tag.parent.p.span
         time_started_tag = speech_header.find(attrs={'class':'HPS-Time'})
         if time_started_tag:
             speech['time_talk_started'] = time_started_tag.get_text()
 
         speech_meta = tag.parent.parent.parent.find('talk.start')
         speech['talk_type'] = speech_meta.parent.name
-        speech['first_speech'] = speech_meta.talker.find('first.speech').get_text()
+
+        # TODO: add in_gov and first_speech if they have value / meaning
+        # speech['first_speech'] = speech_meta.talker.find('first.speech').get_text()
+        # person['in_gov'] = speech_meta.talker.find('in.gov').get_text()
 
         name_id = speech_meta.talker.find('name.id').get_text()
         person['name'] = speech_meta.talker.find('name').get_text()
@@ -43,21 +47,21 @@ def contextualise_tag(tag, debate_id):
         if len(electorate) > 0:
             person['electorate'] = FederalElectorate2016.objects.get(elect_div=electorate)
         person['party'] = speech_meta.talker.find('party').get_text()
-        # TODO: add in_gov if its value has meaning
-        # person['in_gov'] = speech_meta.talker.find('in.gov').get_text()
-
         pobj, created = Person.objects.update_or_create(name_id=name_id, defaults=person)
+
+        speech['spoken_by']=pobj
 
         # First element: a bit of wrangling to get the useful text
         if tag==tag.parent.p:
             # Rare: missing time marker
             siblings = [si if isinstance(si, element.NavigableString) else si.get_text() for si in (tag.find(attrs={'class':'HPS-Time'}) or tag.span).next_siblings]
-            speech['text'] = "".join(siblings)[4:]
+            speech['the_words'] = "".join(siblings)[4:]
         else:
             # Other elements are more straight forward
-            speech['text'] = tag.get_text().strip('\n')
+            speech['the_words'] = tag.get_text().strip('\n')
 
-        # TODO: create referenced sentences records
+        # Create referenced sentences records
+        Sentence.objects.create(**speech)
 
         return speech
 
@@ -112,7 +116,7 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
                             'debate_page_no': int(sd2.debateinfo.find('page.no').get_text()),
                             'session': sobj,
                         })
-                        logger.debug("debate tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
+                        #logger.debug("debate tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
                         dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
                         break
                     elif sd2.name=='subdebate.1' and sd2.parent.name=='debate':
@@ -124,7 +128,7 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
                             'debate_page_no': int(sd2.parent.debateinfo.find('page.no').get_text()),
                             'session': sobj,
                         })
-                        logger.debug("debate > subdebate.1 tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
+                        #logger.debug("debate > subdebate.1 tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
                         dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
                         break
                     elif sd2.name=='subdebate.2':
@@ -147,9 +151,10 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
                                 'debate_page_no': int(sd2.parent.parent.debateinfo.find('page.no').get_text()),
                             })
                         else:
-                            logger.debug("subdebate.2 tag has no debate or subdebate.1 direct ancestor: %s" % talk.parent.parent.name)
+                            #logger.debug("subdebate.2 tag has no debate or subdebate.1 direct ancestor: %s" % talk.parent.parent.name)
+                            pass
 
-                        logger.debug("%s > %s > %s tag enclosing %s > talk.text: %s" % (sd2.parent.parent.name, sd2.parent.name, sd2.name, talk.parent.name, params))
+                        #logger.debug("%s > %s > %s tag enclosing %s > talk.text: %s" % (sd2.parent.parent.name, sd2.parent.name, sd2.name, talk.parent.name, params))
                         dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
                         break
                     sd2 = sd2.parent
@@ -161,13 +166,16 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
                 logger.debug("Couldn't persist debate reference: %s" % params)
                 raise
 
+            # Remove all sentences at this debate reference
+            Sentence.objects.filter(debate_ref=dobj).delete()
+            # ... and re-create them
             for p in talk.find_all('p'):
                 if p.find(attrs={'class': interjection_classes}):
                     pass
                 else:
                     fragments.append(contextualise_tag(p, dobj.id))
 
-    sample = " ".join([frag['text'] for frag in fragments if frag])
+    sample = " ".join([frag['the_words'] for frag in fragments if frag])
     return soup, sample
 
 
@@ -240,3 +248,10 @@ def pos_analysis(tags, stoplist):
     display_freq(adjectives, 'Adjectives', top=50)
     verbs = [wordnet_lemmatizer.lemmatize(word, pos='v') for word, tag in tags if tag[:2] in ('VB') and word not in stoplist]
     display_freq(verbs, 'Verbs', top=50)
+
+def parse_all_hansards(folder='hansard/data/raw'):
+    for dirpath, dirnames, filenames in os.walk(folder):
+        for fname in filenames:
+            if fname.lower().endswith('.xml'):
+                logger.debug("Parsing: %s ... " % (fname))
+                parse_hansard(fname)
