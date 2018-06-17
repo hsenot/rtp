@@ -3,6 +3,7 @@ import nltk
 import logging
 import spacy
 import datetime
+import requests
 
 from lxml import etree
 from bs4 import BeautifulSoup, element
@@ -66,7 +67,7 @@ def contextualise_tag(tag, debate_id):
         return speech
 
     except Exception as e:
-        logger.debug("Error contextualising tag: %s" % (str(tag)[:100],))
+        logger.debug("Error contextualising tag: %s" % (str(tag)[:300],))
         raise
 
 
@@ -160,7 +161,7 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
                     sd2 = sd2.parent
 
             except AttributeError as e:
-                logger.debug("Couldn't extract debate reference: %s" % str(sd2)[:100])
+                logger.debug("Couldn't extract debate reference: %s" % str(sd2)[:300])
                 raise
             except DataError as e:
                 logger.debug("Couldn't persist debate reference: %s" % params)
@@ -255,3 +256,28 @@ def parse_all_hansards(folder='hansard/data/raw'):
             if fname.lower().endswith('.xml'):
                 logger.debug("Parsing: %s ... " % (fname))
                 parse_hansard(fname)
+
+def download_all_hansards(date_from=datetime.date(2016, 8, 30), date_to=None):
+    if date_to is None:
+        date_to = datetime.date.today()
+
+    base_url = "https://www.aph.gov.au/Parliamentary_Business/Hansard?wc="
+
+    for x in range((date_to - date_from).days // 7 + 1):
+        sitting_week =  "%s%s" % (base_url, (date_from +  datetime.timedelta(days=x * 7)).strftime('%d/%m/%Y'))
+        logger.debug("Scraping %s" % (sitting_week,))
+        page = requests.get(sitting_week)
+        soup = BeautifulSoup(page.text, 'html.parser')
+
+        # All Links to XML documents
+        xml_links = soup.find('h2', string=' Chamber Hansard Transcripts').parent.find_all('a', attrs={'title': 'XML format'})
+
+        # Download these links!
+        for xml_link in xml_links:
+            base_api = "https://www.aph.gov.au"
+            hansard = requests.get(base_api + xml_link['href'])
+
+            target_filename = hansard.url.split('/')[-1].split(';')[0].replace('%20', '_').replace('_Official','')
+
+            with open(os.path.join('hansard/data/raw', target_filename), 'w') as xml:
+                xml.write(hansard.text)
