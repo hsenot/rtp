@@ -30,9 +30,16 @@ def contextualise_tag(tag, debate_id):
 
         # Rare: missing time marker
         speech_header = tag.parent.p.span
-        time_started_tag = speech_header.find(attrs={'class':'HPS-Time'})
-        if time_started_tag:
-            speech['time_talk_started'] = time_started_tag.get_text()
+
+        # Time: mostly a single tag text value but sometimes spread across several tags
+        """
+                  <span class="HPS-Time">15</span>
+                  <span class="HPS-Time">:</span>
+                  <span class="HPS-Time">26</span>
+        """
+        time_started_tags = speech_header.find_all(attrs={'class':'HPS-Time'})
+        if len(time_started_tags) > 0:
+            speech['time_talk_started'] = ''.join([tst.get_text() for tst in time_started_tags])
 
         speech_meta = tag.parent.parent.parent.find('talk.start')
         speech['talk_type'] = speech_meta.parent.name
@@ -270,7 +277,7 @@ def download_all_hansards(date_from=datetime.date(2016, 8, 30), date_to=None):
         soup = BeautifulSoup(page.text, 'html.parser')
 
         # All Links to XML documents
-        xml_links = soup.find('h2', string=' Chamber Hansard Transcripts').parent.find_all('a', attrs={'title': 'XML format'})
+        xml_links = soup.find('h2').parent.find_all('a', attrs={'title': 'XML format'})
 
         # Download these links!
         for xml_link in xml_links:
