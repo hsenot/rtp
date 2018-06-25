@@ -4,6 +4,7 @@ import logging
 import spacy
 import datetime
 import requests
+import string
 
 from lxml import etree
 from bs4 import BeautifulSoup, element
@@ -37,41 +38,57 @@ def contextualise_tag(tag, debate_id):
                   <span class="HPS-Time">:</span>
                   <span class="HPS-Time">26</span>
         """
+        # Manually fixed 14:01 in House_of_Representatives_2017_08_14_5360.xml
         time_started_tags = speech_header.find_all(attrs={'class':'HPS-Time'})
         if len(time_started_tags) > 0:
             speech['time_talk_started'] = ''.join([tst.get_text() for tst in time_started_tags])
+            # Oddity
+            if speech['time_talk_started']=='24:00':
+                speech['time_talk_started'] = '00:00'
 
         speech_meta = tag.parent.parent.parent.find('talk.start')
-        speech['talk_type'] = speech_meta.parent.name
+        if speech_meta:
+            speech['talk_type'] = speech_meta.parent.name
 
-        # TODO: add in_gov and first_speech if they have value / meaning
-        # speech['first_speech'] = speech_meta.talker.find('first.speech').get_text()
-        # person['in_gov'] = speech_meta.talker.find('in.gov').get_text()
+            # TODO: add in_gov and first_speech if they have value / meaning
+            # speech['first_speech'] = speech_meta.talker.find('first.speech').get_text()
+            # person['in_gov'] = speech_meta.talker.find('in.gov').get_text()
 
-        name_id = speech_meta.talker.find('name.id').get_text()
-        person['name'] = speech_meta.talker.find('name').get_text()
-        electorate = speech_meta.talker.find('electorate').get_text()
-        # Senate members don't have a federal electorate
-        if len(electorate) > 0:
-            person['electorate'] = FederalElectorate2016.objects.get(elect_div=electorate)
-        person['party'] = speech_meta.talker.find('party').get_text()
-        pobj, created = Person.objects.update_or_create(name_id=name_id, defaults=person)
+            name_id = speech_meta.talker.find('name.id').get_text()
+            person['name'] = speech_meta.talker.find('name').get_text()
+            electorate = speech_meta.talker.find('electorate').get_text()
+            # Senate members don't have a federal electorate
+            if len(electorate) > 0:
+                person['electorate'] = FederalElectorate2016.objects.get(elect_div=electorate)
+            person['party'] = speech_meta.talker.find('party').get_text()
+            pobj, created = Person.objects.update_or_create(name_id=name_id, defaults=person)
 
-        speech['spoken_by']=pobj
+            speech['spoken_by']=pobj
 
-        # First element: a bit of wrangling to get the useful text
-        if tag==tag.parent.p:
-            # Rare: missing time marker
-            siblings = [si if isinstance(si, element.NavigableString) else si.get_text() for si in (tag.find(attrs={'class':'HPS-Time'}) or tag.span).next_siblings]
-            speech['the_words'] = "".join(siblings)[4:]
+            # First element: a bit of wrangling to get the useful text
+            if tag==tag.parent.p:
+                # Rare: missing time marker
+                siblings = [si if isinstance(si, element.NavigableString) else si.get_text() for si in (tag.find(attrs={'class':'HPS-Time'}) or tag.span).next_siblings]
+                speech['the_words'] = "".join(siblings)[4:]
+            else:
+                # Other elements are more straight forward
+                speech['the_words'] = tag.get_text()
+
+            # Sanitisation against line returns and non-ASCII chars
+            speech['the_words'] = speech['the_words'].strip('\n')
+            # TODO: process this kind of stuff: "... northern Western Australiaâ\x80\x94and that\'s thanks ..."
+            # parse_hansard('Senate_2017_12_06_5788.xml')
+            speech['the_words'] = speech['the_words'].replace("\\x80\\x94", '-')
+
+            # Create referenced sentences records
+            Sentence.objects.create(**speech)
+
+            return speech
+
         else:
-            # Other elements are more straight forward
-            speech['the_words'] = tag.get_text().strip('\n')
-
-        # Create referenced sentences records
-        Sentence.objects.create(**speech)
-
-        return speech
+            # No meta info -> can't contextualise the sentence
+            #logger.debug("Tag has no meta: %s" % (str(tag)[:50],))
+            return None
 
     except Exception as e:
         logger.debug("Error contextualising tag: %s" % (str(tag)[:300],))
@@ -101,6 +118,7 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
     interjection_classes = ['HPS-MemberInterjecting', 'HPS-MemberIInterjecting', 'HPS-OfficeInterjecting']
 
     for talk in soup.find_all('talk.text'):
+        skip_talk = False
         # skip <talk.text>\n</talk.text>
         if len(talk.get_text()) > 1:
             sd2 = talk.parent.parent
@@ -124,6 +142,12 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
                             'debate_page_no': int(sd2.debateinfo.find('page.no').get_text()),
                             'session': sobj,
                         })
+                        # Stop processing the entire debate section!
+                        if params['debate_title'] in ('SHADOW MINISTERIAL ARRANGEMENTS', 'MINISTERIAL ARRANGEMENTS'):
+                            # Will that go to the next for iteration?
+                            logger.debug("Skipping %s talk.text ..." % (params['debate_title'],))
+                            skip_talk = True
+                            break
                         #logger.debug("debate tag enclosing %s > talk.text: %s" % (talk.parent.name, params))
                         dobj, created = DebateReference.objects.update_or_create(**params, defaults=params)
                         break
@@ -174,14 +198,19 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
                 logger.debug("Couldn't persist debate reference: %s" % params)
                 raise
 
-            # Remove all sentences at this debate reference
-            Sentence.objects.filter(debate_ref=dobj).delete()
-            # ... and re-create them
-            for p in talk.find_all('p'):
-                if p.find(attrs={'class': interjection_classes}):
-                    pass
-                else:
-                    fragments.append(contextualise_tag(p, dobj.id))
+            if skip_talk:
+                continue
+            else:
+                # Remove all sentences at this debate reference
+                Sentence.objects.filter(debate_ref=dobj).delete()
+                # ... and re-create them
+                for p in talk.find_all('p'):
+                    if p.find(attrs={'class': interjection_classes}):
+                        pass
+                    else:
+                        contextualised_tag = contextualise_tag(p, dobj.id)
+                        if contextualised_tag:
+                            fragments.append(contextualised_tag)
 
     sample = " ".join([frag['the_words'] for frag in fragments if frag])
     return soup, sample
