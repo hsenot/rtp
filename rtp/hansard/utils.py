@@ -38,10 +38,17 @@ def contextualise_tag(tag, debate_id):
                   <span class="HPS-Time">:</span>
                   <span class="HPS-Time">26</span>
         """
-        # Manually fixed 14:01 in House_of_Representatives_2017_08_14_5360.xml
+        # Manually fixes:
+        # House_of_Representatives_2017_08_14_5360.xml: Shorten's intervention at 14:01
+        # House_of_Representatives_2016_08_31_4425.xml: 3 times starting with 13
+        # House_of_Representatives_2016_09_12_4432.xml: 1 time starting with 14
+        # House_of_Representatives_2016_10_10_4462.xml: 1 time starting with 10
         time_started_tags = speech_header.find_all(attrs={'class':'HPS-Time'})
+        allowed_chars = "0123456789:"
         if len(time_started_tags) > 0:
             speech['time_talk_started'] = ''.join([tst.get_text() for tst in time_started_tags])
+            speech['time_talk_started'] = ''.join([c for c in speech['time_talk_started'] if c in allowed_chars])
+            # TODO: if the time is icomplete with format ':XY', use the 2 chars before the time span tag
             # Oddity
             if speech['time_talk_started']=='24:00':
                 speech['time_talk_started'] = '00:00'
@@ -97,7 +104,10 @@ def contextualise_tag(tag, debate_id):
 
 # Returns a structured log of actual speeches devoid of procedural ornements, and annotated by their speaker, start time and type
 def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
-    # House of Representatives_2018_05_21_6162.xml
+    # TODO: a general sanitisation step to only keep ASCII characters
+    # loads of \x80\x94 everywhere
+    # House_of_Representatives_2016_09_15_4439.xml starts with weird characters
+
     # Supported parsers
     # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-a-parser
     with open(os.path.join('hansard/data/raw', filename), 'r') as xml: 
@@ -288,7 +298,7 @@ def pos_analysis(tags, stoplist):
 
 def parse_all_hansards(folder='hansard/data/raw'):
     for dirpath, dirnames, filenames in os.walk(folder):
-        for fname in filenames:
+        for fname in sorted(filenames):
             if fname.lower().endswith('.xml'):
                 logger.debug("Parsing: %s ... " % (fname))
                 parse_hansard(fname)
@@ -316,4 +326,4 @@ def download_all_hansards(date_from=datetime.date(2016, 8, 30), date_to=None):
             target_filename = hansard.url.split('/')[-1].split(';')[0].replace('%20', '_').replace('_Official','')
 
             with open(os.path.join('hansard/data/raw', target_filename), 'w') as xml:
-                xml.write(hansard.text)
+                xml.write(hansard.text.replace(u'â\x80\x93', u' - ').replace(u'â\x80\x94', u' - ').replace(u'â\x80\x91', u'-').replace(u'â\x80\x98', '\'').replace(u'â\x80\x99', '\'').replace(u'â\x80\xA6', u'...'))
