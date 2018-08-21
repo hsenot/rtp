@@ -39,10 +39,12 @@ def contextualise_tag(tag, debate_id):
                   <span class="HPS-Time">26</span>
         """
         # Manually fixes:
+        # House_of_Representatives_2016_09_15_4439.xml: weirdo characters at line 1
         # House_of_Representatives_2017_08_14_5360.xml: Shorten's intervention at 14:01
         # House_of_Representatives_2016_08_31_4425.xml: 3 times starting with 13
         # House_of_Representatives_2016_09_12_4432.xml: 1 time starting with 14
         # House_of_Representatives_2016_10_10_4462.xml: 1 time starting with 10
+        # House_of_Representatives_2016_10_17_4486.xml: 2 times starting at 10:01
         time_started_tags = speech_header.find_all(attrs={'class':'HPS-Time'})
         allowed_chars = "0123456789:"
         if len(time_started_tags) > 0:
@@ -326,4 +328,4 @@ def download_all_hansards(date_from=datetime.date(2016, 8, 30), date_to=None):
             target_filename = hansard.url.split('/')[-1].split(';')[0].replace('%20', '_').replace('_Official','')
 
             with open(os.path.join('hansard/data/raw', target_filename), 'w') as xml:
-                xml.write(hansard.text.replace(u'â\x80\x93', u' - ').replace(u'â\x80\x94', u' - ').replace(u'â\x80\x91', u'-').replace(u'â\x80\x98', '\'').replace(u'â\x80\x99', '\'').replace(u'â\x80\xA6', u'...'))
+                xml.write(hansard.text.replace(u'â\x80\x93', u' - ').replace(u'â\x80\x94', u' - ').replace(u'â\x80\x91', u'-').replace(u'â\x80\x98', '\'').replace(u'â\x80\x99', '\'').replace(u'â\x80\x9C', '"').replace(u'â\x80\x9D', '"').replace(u'â\x80\xA6', u'...').replace(u'â\x80¢Â Â Â', '-').replace(u'â\x84\xA2', '(TM)').replace(u'â\x80¢', u'-'))
