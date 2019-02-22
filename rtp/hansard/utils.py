@@ -116,9 +116,10 @@ def parse_hansard(filename='House of Representatives_2018_05_10_6091.xml'):
         soup = BeautifulSoup(xml.read(), "xml")
 
     session = soup.hansard.find('session.header')
+    dt = datetime.datetime.strptime(session.date.get_text(), '%Y-%m-%d')
     session_params = {
         'parliament_no': int(session.find('parliament.no').get_text()),
-        'date': datetime.datetime.strptime(session.date.get_text(), '%Y-%m-%d'),
+        'date': dt,
         'session_no': int(session.find('session.no').get_text()),
         'period_no': int(session.find('period.no').get_text()),
         'chamber': session.chamber.get_text(),
